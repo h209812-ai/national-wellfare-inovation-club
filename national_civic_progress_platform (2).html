@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Civic Progress Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        civic: {
+                            50: '#f0f4f8',
+                            100: '#d9e2ec',
+                            500: '#102a43',
+                            600: '#0b69a3',
+                            700: '#035388',
+                            800: '#014373',
+                            900: '#002147',
+                        },
+                        emerald: { 500: '#10b981', 600: '#059669' },
+                        amber: { 400: '#fbbf24', 500: '#f59e0b' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose-serif { font-family: 'Merriweather', serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200 min-h-screen flex flex-col">
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
+    <!-- MAIN NAVBAR -->
+    <header class="sticky top-0 z-40 bg-civic-900 text-white shadow-xl border-b border-civic-700 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('feed')">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-civic-600 via-emerald-500 to-amber-400 flex items-center justify-center text-white shadow-md">
+                        <i class="fa-solid fa-flag-usa text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h1 class="font-extrabold text-base sm:text-lg tracking-tight leading-none text-white">
+                                NATIONAL CIVIC PROGRESS
+                            </h1>
+                            <span id="role-badge" class="bg-emerald-500 text-slate-900 font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                Citizen View
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-1">Live Public Platform for National Ideas & Civic Innovation</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex items-center space-x-3">
+                    
+                    <!-- View Toggle Tabs -->
+                    <div class="bg-civic-800 p-1 rounded-xl border border-civic-700 flex items-center text-xs font-bold overflow-x-auto">
+                        <button id="nav-btn-feed" onclick="switchTab('feed')" class="px-3 py-1.5 rounded-lg bg-civic-600 text-white shadow whitespace-nowrap">
+                            <i class="fa-solid fa-earth-americas"></i> <span class="hidden sm:inline">Citizen Feed</span>
+                        </button>
+                        <button id="nav-btn-submit" onclick="switchTab('submit')" class="px-3 py-1.5 rounded-lg text-emerald-400 hover:text-white whitespace-nowrap">
+                            <i class="fa-solid fa-plus-circle"></i> <span class="hidden sm:inline">Submit Idea</span>
+                        </button>
+                        <button id="nav-btn-outreach" onclick="switchTab('outreach')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white whitespace-nowrap">
+                            <i class="fa-solid fa-bullhorn text-amber-400"></i> <span class="hidden sm:inline">Outreach & Share</span>
+                        </button>
+                        <button id="nav-btn-howtosend" onclick="switchTab('howtosend')" class="px-3 py-1.5 rounded-lg text-amber-300 hover:text-white whitespace-nowrap">
+                            <i class="fa-solid fa-paper-plane"></i> <span class="hidden sm:inline">How to Send</span>
+                        </button>
+                        <button id="nav-btn-analytics" onclick="switchTab('analytics')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white whitespace-nowrap">
+                            <i class="fa-solid fa-chart-pie"></i> <span class="hidden sm:inline">Impact Stats</span>
+                        </button>
+                        <button id="nav-btn-studio" onclick="handleStudioTabClick()" class="px-3 py-1.5 rounded-lg text-amber-400 hover:text-white hidden whitespace-nowrap">
+                            <i class="fa-solid fa-pen-to-square"></i> <span class="hidden sm:inline">Host Studio</span>
+                        </button>
+                    </div>
+
+                    <!-- Host Access Switcher -->
+                    <button id="btn-toggle-host" onclick="openHostAuthModal()" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-key"></i> <span id="host-btn-label">Host Login</span>
+                    </button>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-civic-800 hover:bg-civic-700 text-slate-200 transition border border-civic-700 shrink-0" title="Toggle Theme">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- LIVE METRICS QUICK-BAR -->
+    <section class="bg-gradient-to-r from-civic-800 via-civic-900 to-slate-900 text-white py-3.5 border-b border-slate-700 shadow-inner no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/80 flex items-center space-x-3">
+                    <div class="p-2 bg-amber-500/20 text-amber-400 rounded-lg"><i class="fa-solid fa-lightbulb"></i></div>
+                    <div>
+                        <div class="text-lg font-black" id="stat-total">0</div>
+                        <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Published Ideas</div>
+                    </div>
+                </div>
+                <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/80 flex items-center space-x-3">
+                    <div class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg"><i class="fa-solid fa-thumbs-up"></i></div>
+                    <div>
+                        <div class="text-lg font-black" id="stat-support">0</div>
+                        <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Citizen Endorsements</div>
+                    </div>
+                </div>
+                <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/80 flex items-center space-x-3">
+                    <div class="p-2 bg-blue-500/20 text-blue-400 rounded-lg"><i class="fa-solid fa-comments"></i></div>
+                    <div>
+                        <div class="text-lg font-black" id="stat-comments">0</div>
+                        <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Public Comments</div>
+                    </div>
+                </div>
+                <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/80 flex items-center space-x-3">
+                    <div class="p-2 bg-purple-500/20 text-purple-400 rounded-lg"><i class="fa-solid fa-bolt"></i></div>
+                    <div>
+                        <div class="text-lg font-black" id="stat-action">0</div>
+                        <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Active Implementation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN BODY CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8 w-full">
+
+        <!-- TAB 1: PUBLIC CITIZEN FEED -->
+        <div id="tab-feed" class="space-y-6">
+            
+            <!-- HEADER BANNER -->
+            <div class="bg-gradient-to-r from-civic-900 via-civic-800 to-slate-900 text-white p-6 rounded-2xl shadow-xl border border-civic-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn text-amber-400"></i> Citizen Idea Stream & Proposals
+                    </h2>
+                    <p class="text-xs text-slate-300 mt-1">Review national proposals published by the Host. Upvote ideas you support and share feedback!</p>
+                </div>
+                <!-- SECTOR FILTER PILLS CONTAINER -->
+                <div id="feed-sector-pills" class="flex flex-wrap gap-1.5 items-center">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- SEARCH & FILTER TOOLBAR -->
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="relative w-full md:w-96">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+                    <input type="text" id="search-input" oninput="handleSearch()" placeholder="Search proposals, keywords, or tags..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none dark:text-white">
+                </div>
+                <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Sort By:</label>
+                    <select id="sort-select" onchange="handleSortChange()" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs focus:outline-none dark:text-white font-semibold">
+                        <option value="newest">Newest First</option>
+                        <option value="popular">Most Endorsed</option>
+                        <option value="comments">Most Active Discussion</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- PUBLIC FEED CARDS GRID -->
+            <div id="public-feed-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- CITIZEN CIVIC POLL WIDGET -->
+            <div class="bg-gradient-to-r from-slate-900 via-civic-900 to-slate-900 text-white p-6 rounded-2xl shadow-xl border border-slate-700 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-square-poll-vertical"></i> Live National Priority Poll
+                    </h3>
+                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-500/30">Active Public Survey</span>
+                </div>
+                <p class="text-xs text-slate-300">Which national infrastructure sector requires the most urgent public investment in 2026?</p>
+                <div id="poll-options-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 2: CITIZEN PROPOSAL SUBMISSION PORTAL -->
+        <div id="tab-submit" class="hidden space-y-8">
+            <div class="bg-gradient-to-r from-civic-900 via-civic-800 to-slate-900 text-white p-6 rounded-2xl shadow-xl border border-civic-700 space-y-2">
+                <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-pen-nib text-emerald-400"></i> Submit a Citizen Idea or Policy Request
+                </h2>
+                <p class="text-xs text-slate-300">Have an idea to improve your local district or the nation? Submit it directly to the platform! Citizen proposals are featured and reviewed by Host Leadership.</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 space-y-6">
+                <form id="citizen-proposal-form" onsubmit="handleCitizenSubmit(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Your Name / Organization</label>
+                            <input type="text" id="citizen-name" required placeholder="e.g. Jane Doe or Local Youth Civic Club" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Proposal Title</label>
+                            <input type="text" id="citizen-title" required placeholder="e.g. Community Solar Microgrid Network" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Sector Category</label>
+                            <select id="citizen-sector" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                                <option value="Infrastructure">Infrastructure</option>
+                                <option value="Education">Education</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Economy">Economy</option>
+                                <option value="Tech & AI">Tech & AI</option>
+                                <option value="Governance">Governance</option>
+                                <option value="Sustainability">Sustainability</option>
+                                <option value="Youth & Sports">Youth & Sports</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Target Region / City</label>
+                            <input type="text" id="citizen-scope" required placeholder="e.g. District 4 / Nationwide" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Key Tags (Comma separated)</label>
+                            <input type="text" id="citizen-tags" placeholder="e.g. solar, energy, youth" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Brief Pitch & Summary</label>
+                        <textarea id="citizen-summary" rows="2" required placeholder="Explain your proposal in 2-3 sentences..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-xs focus:outline-none dark:text-white"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Detailed Explanation & Solution</label>
+                        <textarea id="citizen-details" rows="5" required placeholder="Describe the problem, proposed solution, and anticipated benefits for citizens..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-xs focus:outline-none dark:text-white"></textarea>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-extrabold shadow-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> Submit Proposal Live
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 3: HOST STUDIO WORKSPACE -->
+        <div id="tab-studio" class="hidden space-y-8">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
+                    <div>
+                        <h2 id="form-mode-title" class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-circle-dot text-emerald-500"></i> New Proposal Mode
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Publish new civic initiatives and policy frameworks directly to the live citizen feed.</p>
+                    </div>
+                    <button id="btn-cancel-edit" onclick="resetProposalForm()" class="hidden px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold">
+                        Cancel Edit
+                    </button>
+                </div>
+
+                <form id="proposal-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    <input type="hidden" id="form-edit-id" value="">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Proposal Title</label>
+                            <input type="text" id="input-title" required placeholder="e.g. National High-Speed AI & Fiber Grid for Schools" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Sector Category</label>
+                            <select id="input-sector" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                                <option value="Infrastructure">Infrastructure</option>
+                                <option value="Education">Education</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Economy">Economy</option>
+                                <option value="Tech & AI">Tech & AI</option>
+                                <option value="Governance">Governance</option>
+                                <option value="Sustainability">Sustainability</option>
+                                <option value="Youth & Sports">Youth & Sports</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Priority</label>
+                            <select id="input-priority" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                                <option value="High Priority">High Priority</option>
+                                <option value="Medium Priority">Medium Priority</option>
+                                <option value="Low Priority">Low Priority</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Scope</label>
+                            <select id="input-scope" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                                <option value="National Scope">National Scope</option>
+                                <option value="Regional / State">Regional / State</option>
+                                <option value="Municipal / Local">Municipal / Local</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Timeline</label>
+                            <input type="text" id="input-timeline" placeholder="e.g. 12 Months" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Status</label>
+                            <select id="input-status" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                                <option value="Published">Published</option>
+                                <option value="In Action">In Action</option>
+                                <option value="Under Review">Under Review</option>
+                                <option value="Draft">Draft</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Executive Summary</label>
+                        <textarea id="input-summary" rows="2" required placeholder="Brief high-level pitch..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-xs focus:outline-none dark:text-white"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Detailed Policy Brief & Justification</label>
+                        <textarea id="input-details" rows="5" required placeholder="Detailed implementation details, rationale, and policy background..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-xs focus:outline-none dark:text-white"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Key Execution Steps (One per line)</label>
+                            <textarea id="input-steps" rows="3" placeholder="Phase 1: Survey districts&#10;Phase 2: Deploy equipment&#10;Phase 3: Nationwide rollout" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-xs focus:outline-none dark:text-white"></textarea>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Budget / Funding Allocation</label>
+                                <input type="text" id="input-budget" placeholder="e.g. $15.5M Federal Infrastructure Grant" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Tags (Comma separated)</label>
+                                <input type="text" id="input-tags" placeholder="e.g. education, fiber, youth, technology" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-xs font-extrabold shadow-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> <span id="btn-submit-text">Publish Live to Citizens</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- HOST INVENTORY LIST -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 space-y-4">
+                <h3 class="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-civic-600"></i> Manage Published Initiatives
+                </h3>
+                <div id="host-inventory-container" class="space-y-2">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: OUTREACH & CAMPAIGN GUIDE -->
+        <div id="tab-outreach" class="hidden space-y-8">
+            <div class="bg-gradient-to-r from-civic-900 via-civic-800 to-slate-900 text-white p-6 rounded-2xl shadow-xl border border-civic-700 space-y-2">
+                <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-bullhorn text-amber-400"></i> Outreach & Public Mobilization Toolkit
+                </h2>
+                <p class="text-xs text-slate-300">Use these proven channels, copy-paste social media templates, direct broadcast links, and printable flyers to build national momentum for your initiatives.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- TEMPLATE 1: CITIZEN MOBILIZATION -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-users text-amber-500 text-lg"></i>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Citizen Outreach Template</h3>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Ideal for posting in community groups, WhatsApp, or email newsletters to get local endorsements.
+                        </p>
+                    </div>
+                    <div class="space-y-2">
+                        <button onclick="copyOutreachTemplate('citizen')" class="w-full py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-800 dark:text-slate-100 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-copy"></i> Copy Message Text
+                        </button>
+                        <div class="flex space-x-2">
+                            <button onclick="shareDirectToSocial('whatsapp')" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1">
+                                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button onclick="shareDirectToSocial('twitter')" class="flex-1 py-1.5 bg-blue-500 hover:bg-blue-400 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1">
+                                <i class="fa-brands fa-x-twitter"></i> Share X
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TEMPLATE 2: MEDIA & PRESS RELEASE -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-newspaper text-civic-600 text-lg"></i>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Press Release & Official Media Pitch</h3>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Formally structured draft ready to send to local news, radio, or municipal journalists.
+                        </p>
+                    </div>
+                    <button onclick="copyOutreachTemplate('press')" class="w-full py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-800 dark:text-slate-100 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-copy"></i> Copy Press Release Draft
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: HOW TO SEND THIS WEBSITE TO CITIZENS -->
+        <div id="tab-howtosend" class="hidden space-y-8">
+            <div class="bg-gradient-to-r from-civic-900 via-civic-800 to-slate-900 text-white p-6 rounded-2xl shadow-xl border border-civic-700 space-y-2">
+                <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-rocket text-amber-400"></i> How to Get This App Online & Send It to Citizens
+                </h2>
+                <p class="text-xs text-slate-300">Follow these 3 simple methods to share your live website with anyone in the world for free.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Method 1: Netlify Drop / GitHub Pages (Free Hosting) -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-black text-lg">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Option A: Host Free on Netlify (1-Minute Direct Upload)</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            1. Save this file to your computer as <b>index.html</b>.<br>
+                            2. Go to <b>app.netlify.com/drop</b>.<br>
+                            3. Drag & drop the <b>index.html</b> file.<br>
+                            4. Netlify will give you a live website link (e.g., <i>https://yourname-civic.netlify.app</i>) that you can send to any citizen!
+                        </p>
+                    </div>
+                    <button onclick="downloadHtmlFile()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> Download index.html File
+                    </button>
+                </div>
+
+                <!-- Method 2: Vercel / GitHub Pages -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center font-black text-lg">
+                            <i class="fa-brands fa-github"></i>
+                        </div>
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Option B: Free GitHub Pages</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            1. Create a free account on GitHub.com.<br>
+                            2. Create a repository named <b>civic-platform</b>.<br>
+                            3. Upload <b>index.html</b> and enable <b>GitHub Pages</b> in settings.<br>
+                            4. Your live link will be <i>https://username.github.io/civic-platform</i>.
+                        </p>
+                    </div>
+                    <a href="https://pages.github.com" target="_blank" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Open GitHub Pages
+                    </a>
+                </div>
+
+                <!-- Method 3: Direct Link Sharing -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-black text-lg">
+                            <i class="fa-solid fa-share-nodes"></i>
+                        </div>
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Option C: Direct Link Sharing</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            If this app is already previewed/hosted on your server, simply click the button below to copy the direct URL and send it directly via WhatsApp, SMS, or Email!
+                        </p>
+                    </div>
+                    <button onclick="copyCurrentPageUrl()" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-extrabold rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-link"></i> Copy Live Web Link
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB 6: ANALYTICS DASHBOARD -->
+        <div id="tab-analytics" class="hidden space-y-8">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-civic-600"></i> National Impact & Engagement Analytics
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Real-time breakdown of proposals across sectors and live citizen endorsements.</p>
+                </div>
+                <button onclick="exportProposalsToCSV()" class="px-4 py-2 bg-civic-700 hover:bg-civic-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv"></i> Export Data CSV
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 space-y-4">
+                    <h3 class="font-extrabold text-sm text-slate-800 dark:text-white"><i class="fa-solid fa-chart-pie text-emerald-500 mr-2"></i> Proposals by Sector</h3>
+                    <div class="relative h-64 w-full"><canvas id="chart-sector"></canvas></div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 space-y-4">
+                    <h3 class="font-extrabold text-sm text-slate-800 dark:text-white"><i class="fa-solid fa-chart-bar text-amber-500 mr-2"></i> Execution Pipeline</h3>
+                    <div class="relative h-64 w-full"><canvas id="chart-status"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-civic-900 text-slate-400 text-xs py-8 border-t border-civic-800 mt-12 no-print">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <div class="flex justify-center items-center space-x-2">
+                <div class="w-5 h-5 rounded bg-emerald-500 flex items-center justify-center text-white text-[10px] font-bold"><i class="fa-solid fa-flag"></i></div>
+                <span class="font-bold text-white">National Civic Progress Network</span>
+            </div>
+            <p>Live collaborative platform connecting citizens and host leaders for national improvement.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL: HOST LOGIN PASSKEY -->
+    <div id="modal-host-auth" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+                <h3 class="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield text-amber-500"></i> Host Authorization Access
+                </h3>
+                <button onclick="closeHostAuthModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Enter Host Passkey to unlock the proposal publishing studio.</p>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Passkey</label>
+                <input type="password" id="input-passkey" placeholder="Enter passkey (Default: admin123)" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeHostAuthModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold">Cancel</button>
+                <button onclick="verifyHostPasskey()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-xs font-extrabold transition">Unlock Host Studio</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: FULL PROPOSAL READER & CITIZEN COMMENTS -->
+    <div id="modal-reader" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col">
+            
+            <div class="bg-slate-900 text-white p-4 sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 no-print">
+                <span class="bg-amber-400 text-slate-900 font-extrabold text-[10px] px-2 py-0.5 rounded uppercase">Official Policy Document</span>
+                <div class="flex items-center space-x-2">
+                    <button onclick="copyCurrentShareLink()" class="bg-civic-700 hover:bg-civic-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-share-nodes"></i> Share Link
+                    </button>
+                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-print"></i> Print Brief
+                    </button>
+                    <button onclick="closeReaderModal()" class="text-slate-400 hover:text-white p-1 text-lg"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <div id="modal-reader-body" class="p-6 md:p-8 space-y-6 text-slate-800 dark:text-slate-100">
+                <!-- Dynamically populated -->
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FIREBASE INITIALIZATION & REAL-TIME LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // GLOBAL CONFIGURATIONS
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'national-civic-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : { apiKey: "demo", authDomain: "demo.firebaseapp.com", projectId: "demo" };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Firestore Strict Rule Path: /artifacts/{appId}/public/data/{collectionName}
+        const PROPOSALS_COLLECTION_PATH = ['artifacts', appId, 'public', 'data', 'proposals'];
+
+        // STATE VARIABLES
+        window.proposals = [];
+        window.currentUser = null;
+        window.isHost = false;
+        window.currentTab = 'feed';
+        window.readerSectorFilter = 'ALL';
+        window.activeModalId = null;
+        window.searchQuery = '';
+        window.currentSort = 'newest';
+
+        // SAMPLE POLL STATE
+        window.pollVotes = { Infrastructure: 42, Education: 38, Healthcare: 29, "Tech & AI": 18 };
+        window.hasPolled = false;
+
+        let chartSectorInstance = null;
+        let chartStatusInstance = null;
+
+        // AUTHENTICATION & LIVE INITIALIZATION
+        async function initAuthAndData() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const userCredential = await signInWithCustomToken(auth, __initial_auth_token);
+                    window.currentUser = userCredential.user;
+                } else {
+                    const userCredential = await signInAnonymously(auth);
+                    window.currentUser = userCredential.user;
+                }
+                subscribeToLiveProposals();
+            } catch (error) {
+                console.error("Firebase auth error:", error);
+                showToast("Connection initialized in fallback mode.", "info");
+            }
+        }
+
+        // REAL-TIME FIRESTORE SUBSCRIPTION
+        function subscribeToLiveProposals() {
+            const colRef = collection(db, ...PROPOSALS_COLLECTION_PATH);
+
+            onSnapshot(colRef, (snapshot) => {
+                const liveData = [];
+                snapshot.forEach((doc) => {
+                    liveData.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Client-side sort by createdAt descending by default
+                liveData.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                
+                window.proposals = liveData;
+
+                // If seed proposals empty, seed defaults
+                if (window.proposals.length === 0 && window.isHost) {
+                    seedDefaultProposals();
+                }
+
+                renderAll();
+                checkUrlForSharedProposal();
+            }, (error) => {
+                console.error("Firestore snapshot error:", error);
+                showToast("Error connecting to live server.", "error");
+            });
+        }
+
+        // SEED DEFAULT PROPOSALS IF EMPTY
+        async function seedDefaultProposals() {
+            const defaults = [
+                {
+                    title: 'National High-Speed AI & Fiber Grid for Schools',
+                    sector: 'Education',
+                    priority: 'High Priority',
+                    scope: 'National Scope',
+                    timeline: '24 Months',
+                    status: 'Published',
+                    summary: 'Deploy state-of-the-art fiber infrastructure and customized AI ethics curricula across every public school district.',
+                    details: 'This proposal establishes a unified National Digital Literacy Standard. Every rural and urban public school will receive high-speed internet subsidies and open-source robotics toolkits.\n\n### Key Goals:\n• 100% Fiber connection in 2 years.\n• Train 25,000 public teachers.',
+                    steps: ['Pass Federal Broadband Bill', 'Deploy Fiber Kits to 5,000 Pilot Districts', 'Full Nationwide Expansion'],
+                    budget: '$18.5M Federal Grant',
+                    tags: ['education', 'fiber', 'youth'],
+                    supportCount: 142,
+                    votedUsers: [],
+                    comments: [{ author: 'Citizen Advocacy', text: 'This will bridge the rural tech gap dramatically!', date: '2026-10-18' }],
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    title: 'Interstate Solar Highway Noise Barrier Network',
+                    sector: 'Infrastructure',
+                    priority: 'High Priority',
+                    scope: 'Regional / State',
+                    timeline: '12 Months',
+                    status: 'In Action',
+                    summary: 'Convert passive highway noise barriers into solar panels that generate clean power for municipal smart grids.',
+                    details: 'By utilizing existing public highway noise walls, we convert unused highway perimeter into continuous energy generators feeding directly into nearby cities.',
+                    steps: ['Corridor 95 Pilot Test', 'Utility Board Interconnection Approval'],
+                    budget: '$9.2M Infrastructure Bond',
+                    tags: ['clean energy', 'solar', 'transit'],
+                    supportCount: 289,
+                    votedUsers: [],
+                    comments: [],
+                    createdAt: new Date(Date.now() - 86400000).toISOString()
+                },
+                {
+                    title: 'Universal Telehealth Emergency Response Network',
+                    sector: 'Healthcare',
+                    priority: 'High Priority',
+                    scope: 'National Scope',
+                    timeline: '18 Months',
+                    status: 'Under Review',
+                    summary: 'Provide immediate 24/7 video access to triage nurses and emergency physicians for rural and underserved communities.',
+                    details: 'Eliminates travel bottlenecks for urgent health consultations. Provides diagnostic kits to regional community centers.',
+                    steps: ['App Platform Integration', 'Regional Telehealth Hub Launch'],
+                    budget: '$12.0M Healthcare Infrastructure',
+                    tags: ['healthcare', 'telehealth', 'rural'],
+                    supportCount: 95,
+                    votedUsers: [],
+                    comments: [],
+                    createdAt: new Date(Date.now() - 172800000).toISOString()
+                }
+            ];
+
+            for (const item of defaults) {
+                await addDoc(collection(db, ...PROPOSALS_COLLECTION_PATH), item);
+            }
+        }
+
+        // URL DEEP LINK CHECK
+        function checkUrlForSharedProposal() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const propId = urlParams.get('proposal');
+            if (propId && window.proposals.some(p => p.id === propId) && !window.activeModalId) {
+                openReaderModal(propId);
+            }
+        }
+
+        // GLOBAL ACTION HANDLERS
+        window.switchTab = function(tabName) {
+            window.currentTab = tabName;
+            document.getElementById('tab-feed').classList.toggle('hidden', tabName !== 'feed');
+            document.getElementById('tab-submit').classList.toggle('hidden', tabName !== 'submit');
+            document.getElementById('tab-outreach').classList.toggle('hidden', tabName !== 'outreach');
+            document.getElementById('tab-howtosend').classList.toggle('hidden', tabName !== 'howtosend');
+            document.getElementById('tab-studio').classList.toggle('hidden', tabName !== 'studio');
+            document.getElementById('tab-analytics').classList.toggle('hidden', tabName !== 'analytics');
+
+            document.getElementById('nav-btn-feed').className = `px-3 py-1.5 rounded-lg ${tabName === 'feed' ? 'bg-civic-600 text-white shadow' : 'text-slate-300 hover:text-white'}`;
+            document.getElementById('nav-btn-submit').className = `px-3 py-1.5 rounded-lg ${tabName === 'submit' ? 'bg-emerald-600 text-white shadow font-bold' : 'text-emerald-400 hover:text-white'}`;
+            document.getElementById('nav-btn-outreach').className = `px-3 py-1.5 rounded-lg ${tabName === 'outreach' ? 'bg-civic-600 text-white shadow' : 'text-slate-300 hover:text-white'}`;
+            document.getElementById('nav-btn-howtosend').className = `px-3 py-1.5 rounded-lg ${tabName === 'howtosend' ? 'bg-civic-600 text-white shadow' : 'text-slate-300 hover:text-white'}`;
+            document.getElementById('nav-btn-analytics').className = `px-3 py-1.5 rounded-lg ${tabName === 'analytics' ? 'bg-civic-600 text-white shadow' : 'text-slate-300 hover:text-white'}`;
+            
+            const btnStudio = document.getElementById('nav-btn-studio');
+            if (btnStudio) {
+                btnStudio.className = `px-3 py-1.5 rounded-lg ${tabName === 'studio' ? 'bg-amber-500 text-slate-900 shadow font-extrabold' : 'text-amber-400 hover:text-white'}`;
+            }
+
+            if (tabName === 'analytics') renderAnalyticsCharts();
+        };
+
+        window.downloadHtmlFile = function() {
+            const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("index.html downloaded successfully!");
+        };
+
+        window.copyCurrentPageUrl = function() {
+            const url = window.location.href;
+            const temp = document.createElement('textarea');
+            temp.value = url;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast("Live Website URL copied to clipboard!");
+        };
+
+        // EXPORT DATA TO CSV
+        window.exportProposalsToCSV = function() {
+            if (!window.proposals || window.proposals.length === 0) {
+                showToast("No proposals available to export.", "info");
+                return;
+            }
+
+            let csv = "ID,Title,Sector,Priority,Scope,Status,SupportCount,CommentsCount,CreatedAt\n";
+            window.proposals.forEach(p => {
+                const title = `"${(p.title || '').replace(/"/g, '""')}"`;
+                const sector = `"${p.sector || ''}"`;
+                const priority = `"${p.priority || ''}"`;
+                const scope = `"${p.scope || ''}"`;
+                const status = `"${p.status || ''}"`;
+                const support = p.supportCount || 0;
+                const comments = (p.comments || []).length;
+                const created = p.createdAt || '';
+                csv += `${p.id},${title},${sector},${priority},${scope},${status},${support},${comments},${created}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `civic_proposals_export_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("CSV exported successfully!");
+        };
+
+        // SEARCH AND SORT HANDLERS
+        window.handleSearch = function() {
+            window.searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+            renderFeed();
+        };
+
+        window.handleSortChange = function() {
+            window.currentSort = document.getElementById('sort-select').value;
+            renderFeed();
+        };
+
+        // SOCIAL SHARING HELPERS
+        window.shareDirectToSocial = function(platform) {
+            const pageUrl = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent("Check out this national civic progress proposal and endorse it live!");
+            
+            if (platform === 'whatsapp') {
+                window.open(`https://api.whatsapp.com/send?text=${text}%20${pageUrl}`, '_blank');
+            } else if (platform === 'twitter') {
+                window.open(`https://twitter.com/intent/tweet?text=${text}&url=${pageUrl}`, '_blank');
+            }
+        };
+
+        window.copyOutreachTemplate = function(type) {
+            let msg = '';
+            const appUrl = window.location.href;
+
+            if (type === 'citizen') {
+                msg = `Hello! I have launched a national initiative proposal on our Civic Progress Platform to improve our country.\n\nPlease review the plan, click 'Endorse' to show your support, and leave your thoughts in the public comments:\n\n${appUrl}`;
+            } else if (type === 'press') {
+                msg = `FOR IMMEDIATE RELEASE\n\nSubject: Citizen-Led National Initiative Proposal Gains Public Support\n\nCitizens have submitted a major civic proposal aimed at national progress. View full policy steps and live community endorsements here:\n${appUrl}`;
+            }
+
+            const temp = document.createElement('textarea');
+            temp.value = msg;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+
+            showToast("Template copied to clipboard!");
+        };
+
+        window.handleStudioTabClick = function() {
+            if (!window.isHost) {
+                openHostAuthModal();
+            } else {
+                switchTab('studio');
+            }
+        };
+
+        window.openHostAuthModal = function() {
+            if (window.isHost) {
+                window.isHost = false;
+                document.getElementById('role-badge').className = "bg-emerald-500 text-slate-900 font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider";
+                document.getElementById('role-badge').innerText = "Citizen View";
+                document.getElementById('host-btn-label').innerText = "Host Login";
+                document.getElementById('nav-btn-studio').classList.add('hidden');
+                switchTab('feed');
+                showToast("Logged out of Host Studio.", "info");
+            } else {
+                document.getElementById('modal-host-auth').classList.remove('hidden');
+            }
+        };
+
+        window.closeHostAuthModal = function() {
+            document.getElementById('modal-host-auth').classList.add('hidden');
+        };
+
+        window.verifyHostPasskey = function() {
+            const val = document.getElementById('input-passkey').value.trim();
+            if (val === 'admin123' || val === 'host') {
+                window.isHost = true;
+                document.getElementById('role-badge').className = "bg-amber-400 text-slate-900 font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider";
+                document.getElementById('role-badge').innerText = "Host Official Mode";
+                document.getElementById('host-btn-label').innerText = "Exit Host Mode";
+                document.getElementById('nav-btn-studio').classList.remove('hidden');
+                closeHostAuthModal();
+                switchTab('studio');
+                showToast("Unlocked Host Publishing Studio!", "success");
+            } else {
+                showToast("Incorrect Host Passkey.", "error");
+            }
+        };
+
+        // CITIZEN SUBMIT PROPOSAL
+        window.handleCitizenSubmit = async function(e) {
+            e.preventDefault();
+            if (!window.currentUser) {
+                showToast("Authenticating with server...", "error");
+                return;
+            }
+
+            const authorName = document.getElementById('citizen-name').value.trim();
+            const title = document.getElementById('citizen-title').value.trim();
+            const sector = document.getElementById('citizen-sector').value;
+            const scope = document.getElementById('citizen-scope').value.trim();
+            const summary = document.getElementById('citizen-summary').value.trim();
+            const details = document.getElementById('citizen-details').value.trim();
+            const tags = document.getElementById('citizen-tags').value.split(',').map(t => t.trim().toLowerCase()).filter(t => t.length > 0);
+
+            try {
+                await addDoc(collection(db, ...PROPOSALS_COLLECTION_PATH), {
+                    title: `[Citizen Proposal] ${title}`,
+                    sector,
+                    priority: 'Medium Priority',
+                    scope,
+                    timeline: 'Proposed',
+                    status: 'Under Review',
+                    summary: `Submitted by ${authorName}: ${summary}`,
+                    details: `Submitted by Citizen Advocate: ${authorName}\n\n${details}`,
+                    steps: ['Community Review', 'Host Evaluation'],
+                    budget: 'To Be Evaluated',
+                    tags: ['citizen-submitted', ...tags],
+                    supportCount: 1,
+                    votedUsers: [window.currentUser.uid],
+                    comments: [{ author: 'System', text: `Submitted by ${authorName} for host review.`, date: new Date().toISOString().split('T')[0] }],
+                    createdAt: new Date().toISOString()
+                });
+
+                document.getElementById('citizen-proposal-form').reset();
+                showToast("Your proposal was submitted live to the community!");
+                switchTab('feed');
+            } catch (err) {
+                console.error("Citizen submit error:", err);
+                showToast("Failed to submit proposal.", "error");
+            }
+        };
+
+        // FORM SUBMIT (CREATE OR EDIT BY HOST)
+        window.handleFormSubmit = async function(e) {
+            e.preventDefault();
+            if (!window.currentUser) {
+                showToast("Authenticating with server...", "error");
+                return;
+            }
+
+            const editId = document.getElementById('form-edit-id').value;
+            const title = document.getElementById('input-title').value.trim();
+            const sector = document.getElementById('input-sector').value;
+            const priority = document.getElementById('input-priority').value;
+            const scope = document.getElementById('input-scope').value;
+            const timeline = document.getElementById('input-timeline').value.trim();
+            const status = document.getElementById('input-status').value;
+            const summary = document.getElementById('input-summary').value.trim();
+            const details = document.getElementById('input-details').value.trim();
+            const budget = document.getElementById('input-budget').value.trim();
+            
+            const steps = document.getElementById('input-steps').value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            const tags = document.getElementById('input-tags').value.split(',').map(t => t.trim().toLowerCase()).filter(t => t.length > 0);
+
+            try {
+                if (editId) {
+                    const docRef = doc(db, ...PROPOSALS_COLLECTION_PATH, editId);
+                    await updateDoc(docRef, {
+                        title, sector, priority, scope, timeline, status, summary, details, steps, budget, tags
+                    });
+                    showToast("Proposal updated live across network!");
+                } else {
+                    await addDoc(collection(db, ...PROPOSALS_COLLECTION_PATH), {
+                        title, sector, priority, scope, timeline, status, summary, details, steps, budget, tags,
+                        supportCount: 1,
+                        votedUsers: [window.currentUser.uid],
+                        comments: [],
+                        createdAt: new Date().toISOString()
+                    });
+                    showToast("New Proposal Published Live to Citizens!");
+                }
+                resetProposalForm();
+            } catch (err) {
+                console.error("Firestore write error:", err);
+                showToast("Failed to publish proposal.", "error");
+            }
+        };
+
+        window.resetProposalForm = function() {
+            document.getElementById('proposal-form').reset();
+            document.getElementById('form-edit-id').value = '';
+            document.getElementById('form-mode-title').innerHTML = '<i class="fa-solid fa-circle-dot text-emerald-500"></i> New Proposal Mode';
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            document.getElementById('btn-submit-text').innerText = 'Publish Live to Citizens';
+        };
+
+        window.editProposalInStudio = function(id) {
+            const p = window.proposals.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('form-edit-id').value = p.id;
+            document.getElementById('input-title').value = p.title;
+            document.getElementById('input-sector').value = p.sector;
+            document.getElementById('input-priority').value = p.priority;
+            document.getElementById('input-scope').value = p.scope;
+            document.getElementById('input-timeline').value = p.timeline || '';
+            document.getElementById('input-status').value = p.status;
+            document.getElementById('input-summary').value = p.summary;
+            document.getElementById('input-details').value = p.details;
+            document.getElementById('input-budget').value = p.budget || '';
+            document.getElementById('input-steps').value = p.steps ? p.steps.join('\n') : '';
+            document.getElementById('input-tags').value = p.tags ? p.tags.join(', ') : '';
+
+            document.getElementById('form-mode-title').innerHTML = `<i class="fa-solid fa-pen text-amber-500"></i> Editing ID: ${p.id}`;
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            document.getElementById('btn-submit-text').innerText = 'Update Proposal Live';
+
+            switchTab('studio');
+            window.scrollTo({ top: 100, behavior: 'smooth' });
+        };
+
+        window.deleteProposal = async function(id) {
+            if (confirm("Permanently delete this proposal from the national live database?")) {
+                try {
+                    await deleteDoc(doc(db, ...PROPOSALS_COLLECTION_PATH, id));
+                    showToast("Proposal deleted from database.");
+                } catch(e) {
+                    showToast("Error deleting proposal.", "error");
+                }
+            }
+        };
+
+        // REAL-TIME UPVOTING / ENDORSEMENTS
+        window.upvoteProposal = async function(id) {
+            if (!window.currentUser) return;
+            const p = window.proposals.find(item => item.id === id);
+            if (!p) return;
+
+            const votedUsers = p.votedUsers || [];
+            const userId = window.currentUser.uid;
+
+            if (votedUsers.includes(userId)) {
+                showToast("You have already endorsed this proposal!", "info");
+                return;
+            }
+
+            try {
+                const docRef = doc(db, ...PROPOSALS_COLLECTION_PATH, id);
+                await updateDoc(docRef, {
+                    supportCount: (p.supportCount || 0) + 1,
+                    votedUsers: [...votedUsers, userId]
+                });
+                showToast("Your endorsement was recorded live!");
+            } catch(e) {
+                console.error("Upvote error:", e);
+            }
+        };
+
+        // CIVIC POLL VOTING
+        window.voteInPoll = function(sectorKey) {
+            if (window.hasPolled) {
+                showToast("You have already submitted your vote in this poll!", "info");
+                return;
+            }
+            window.pollVotes[sectorKey] = (window.pollVotes[sectorKey] || 0) + 1;
+            window.hasPolled = true;
+            showToast(`Vote cast for ${sectorKey}! Thank you for shaping national priorities.`);
+            renderPollWidget();
+        };
+
+        // PUBLIC COMMENTS
+        window.addCitizenComment = async function(id) {
+            const input = document.getElementById(`comment-input-${id}`);
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+
+            const p = window.proposals.find(item => item.id === id);
+            if (!p) return;
+
+            const newComment = {
+                author: window.isHost ? 'Host Official' : 'Citizen ' + window.currentUser.uid.substring(0, 4),
+                text: text,
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            try {
+                const docRef = doc(db, ...PROPOSALS_COLLECTION_PATH, id);
+                await updateDoc(docRef, {
+                    comments: [...(p.comments || []), newComment]
+                });
+                input.value = '';
+                showToast("Comment posted live!");
+                if (window.activeModalId === id) openReaderModal(id);
+            } catch(e) {
+                showToast("Failed to post comment.", "error");
+            }
+        };
+
+        // RENDER FUNCTIONS
+        function renderAll() {
+            updateMetrics();
+            renderFeed();
+            renderHostInventory();
+            renderPollWidget();
+            if (window.currentTab === 'analytics') renderAnalyticsCharts();
+        }
+
+        function updateMetrics() {
+            const total = window.proposals.length;
+            const support = window.proposals.reduce((sum, p) => sum + (p.supportCount || 0), 0);
+            const comments = window.proposals.reduce((sum, p) => sum + ((p.comments || []).length), 0);
+            const action = window.proposals.filter(p => p.status === 'In Action').length;
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-support').innerText = support.toLocaleString();
+            document.getElementById('stat-comments').innerText = comments.toLocaleString();
+            document.getElementById('stat-action').innerText = action;
+        }
+
+        function renderPollWidget() {
+            const container = document.getElementById('poll-options-container');
+            if (!container) return;
+
+            const totalVotes = Object.values(window.pollVotes).reduce((a, b) => a + b, 0);
+
+            container.innerHTML = Object.keys(window.pollVotes).map(key => {
+                const count = window.pollVotes[key];
+                const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+                return `
+                    <button onclick="voteInPoll('${key}')" class="p-3 bg-slate-800/80 hover:bg-slate-800 rounded-xl border border-slate-700 flex flex-col justify-between text-left transition group">
+                        <div class="flex justify-between items-center w-full mb-1">
+                            <span class="text-xs font-bold text-white group-hover:text-amber-400">${key}</span>
+                            <span class="text-[10px] font-extrabold text-slate-400">${pct}% (${count})</span>
+                        </div>
+                        <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-amber-400 h-full transition-all duration-500" style="width: ${pct}%"></div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderFeed() {
+            renderSectorPills();
+            const container = document.getElementById('public-feed-container');
+            if (!container) return;
+
+            let list = [...window.proposals];
+
+            // 1. Sector Filter
+            if (window.readerSectorFilter !== 'ALL') {
+                list = list.filter(p => p.sector === window.readerSectorFilter);
+            }
+
+            // 2. Keyword Search
+            if (window.searchQuery) {
+                const q = window.searchQuery;
+                list = list.filter(p => 
+                    p.title.toLowerCase().includes(q) || 
+                    p.summary.toLowerCase().includes(q) || 
+                    (p.tags && p.tags.some(t => t.toLowerCase().includes(q)))
+                );
+            }
+
+            // 3. Sorting
+            if (window.currentSort === 'popular') {
+                list.sort((a, b) => (b.supportCount || 0) - (a.supportCount || 0));
+            } else if (window.currentSort === 'comments') {
+                list.sort((a, b) => ((b.comments || []).length) - ((a.comments || []).length));
+            } else {
+                list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            }
+
+            container.innerHTML = '';
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-12 text-center space-y-2">
+                        <i class="fa-solid fa-folder-open text-3xl text-slate-400"></i>
+                        <h4 class="font-bold text-slate-700 dark:text-slate-200 text-sm">No Published Proposals Found</h4>
+                        <p class="text-xs text-slate-400">Try clearing your search terms or filter selection.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-6 flex flex-col justify-between space-y-4 hover:shadow-xl transition';
+
+                const hasVoted = (p.votedUsers || []).includes(window.currentUser?.uid);
+
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                ${p.sector}
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-semibold">
+                                ${p.scope} • ${p.priority}
+                            </span>
+                        </div>
+
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white leading-snug">
+                            ${p.title}
+                        </h3>
+
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
+                            ${p.summary}
+                        </p>
+
+                        ${p.tags && p.tags.length > 0 ? `
+                            <div class="flex flex-wrap gap-1 pt-1">
+                                ${p.tags.map(t => `<span class="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">#${t}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-700/80 flex items-center justify-between text-xs gap-2">
+                        <button onclick="upvoteProposal('${p.id}')" class="px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 ${hasVoted ? 'bg-emerald-600 text-white' : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100'}">
+                            <i class="fa-solid fa-thumbs-up"></i> ${hasVoted ? 'Endorsed' : 'Endorse'} (${p.supportCount || 0})
+                        </button>
+
+                        <div class="flex items-center space-x-1">
+                            <button onclick="copyShareLinkForId('${p.id}')" class="p-2 text-slate-400 hover:text-civic-600 transition" title="Copy Share Link">
+                                <i class="fa-solid fa-share-nodes"></i>
+                            </button>
+                            <button onclick="openReaderModal('${p.id}')" class="px-4 py-1.5 bg-civic-600 hover:bg-civic-700 text-white rounded-lg font-bold transition flex items-center gap-1">
+                                View Policy <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function renderSectorPills() {
+            const container = document.getElementById('feed-sector-pills');
+            if (!container) return;
+
+            const sectors = ['ALL', 'Infrastructure', 'Education', 'Healthcare', 'Economy', 'Tech & AI', 'Governance', 'Sustainability', 'Youth & Sports'];
+
+            container.innerHTML = sectors.map(sec => `
+                <button onclick="setSectorFilter('${sec}')" class="text-[10px] font-bold px-2.5 py-1 rounded-lg transition ${window.readerSectorFilter === sec ? 'bg-amber-400 text-slate-900' : 'bg-civic-800 text-slate-300 hover:bg-civic-700'}">
+                    ${sec}
+                </button>
+            `).join('');
+        }
+
+        window.setSectorFilter = function(sec) {
+            window.readerSectorFilter = sec;
+            renderFeed();
+        };
+
+        function renderHostInventory() {
+            const container = document.getElementById('host-inventory-container');
+            if (!container) return;
+
+            container.innerHTML = '';
+            if (window.proposals.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic">No proposals created yet.</p>`;
+                return;
+            }
+
+            window.proposals.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs';
+                item.innerHTML = `
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-bold text-civic-700 dark:text-civic-300">${p.sector}</span>
+                            <span class="px-2 py-0.5 text-[9px] font-extrabold rounded bg-emerald-500/10 text-emerald-500">${p.status}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 dark:text-white">${p.title}</h4>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button onclick="editProposalInStudio('${p.id}')" class="px-3 py-1 bg-civic-600 text-white rounded font-bold hover:bg-civic-700">Edit</button>
+                        <button onclick="deleteProposal('${p.id}')" class="p-1 text-slate-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // READER MODAL & SHARE LINKS
+        window.openReaderModal = function(id) {
+            const p = window.proposals.find(item => item.id === id);
+            if (!p) return;
+            window.activeModalId = id;
+
+            const modalBody = document.getElementById('modal-reader-body');
+            modalBody.innerHTML = `
+                <div class="border-b border-slate-200 dark:border-slate-700 pb-4 space-y-2">
+                    <span class="text-xs font-bold uppercase text-civic-600 dark:text-civic-300 tracking-wider">
+                        Pillar: ${p.sector} | Status: ${p.status}
+                    </span>
+                    <h2 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight">
+                        ${p.title}
+                    </h2>
+                    <div class="flex flex-wrap gap-2 text-xs font-semibold text-slate-500">
+                        <span>Scope: ${p.scope}</span> • <span>Timeline: ${p.timeline || 'N/A'}</span> • <span>Budget: ${p.budget || 'N/A'}</span>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border-l-4 border-civic-600 italic text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                    "${p.summary}"
+                </div>
+
+                <div class="prose-serif text-xs md:text-sm leading-relaxed space-y-4 whitespace-pre-line text-slate-800 dark:text-slate-200">
+                    ${p.details}
+                </div>
+
+                ${p.steps && p.steps.length > 0 ? `
+                    <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-2">
+                        <h4 class="font-extrabold text-xs uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Execution Plan Steps</h4>
+                        <ul class="text-xs space-y-1 list-disc list-inside text-slate-700 dark:text-slate-200">
+                            ${p.steps.map(s => `<li>${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+
+                <!-- PUBLIC COMMENTS SECTION -->
+                <div class="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        Public Comments & Citizen Feedback (${(p.comments || []).length})
+                    </h4>
+
+                    <div class="space-y-2">
+                        ${p.comments && p.comments.length > 0 ? p.comments.map(c => `
+                            <div class="p-3 bg-slate-100 dark:bg-slate-900 rounded-lg text-xs space-y-1">
+                                <div class="font-bold text-civic-600 dark:text-civic-300 flex justify-between">
+                                    <span>${c.author}</span>
+                                    <span class="text-[10px] text-slate-400">${c.date}</span>
+                                </div>
+                                <p class="text-slate-700 dark:text-slate-300">${c.text}</p>
+                            </div>
+                        `).join('') : '<p class="text-xs text-slate-400 italic">No public comments yet. Be the first citizen to leave feedback!</p>'}
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                        <input type="text" id="comment-input-${p.id}" placeholder="Type citizen comment or feedback..." class="flex-grow bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none dark:text-white">
+                        <button onclick="addCitizenComment('${p.id}')" class="px-4 py-2 bg-civic-600 text-white text-xs font-bold rounded-lg hover:bg-civic-700 transition">Post Comment</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-reader').classList.remove('hidden');
+        };
+
+        window.closeReaderModal = function() {
+            document.getElementById('modal-reader').classList.add('hidden');
+            window.activeModalId = null;
+        };
+
+        window.copyCurrentShareLink = function() {
+            if (window.activeModalId) {
+                copyShareLinkForId(window.activeModalId);
+            }
+        };
+
+        window.copyShareLinkForId = function(id) {
+            const shareUrl = window.location.origin + window.location.pathname + '?proposal=' + id;
+            
+            const tempInput = document.createElement('input');
+            tempInput.value = shareUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast("Shareable link copied to clipboard!");
+        };
+
+        function renderAnalyticsCharts() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#cbd5e1' : '#334155';
+
+            const sectors = ['Infrastructure', 'Education', 'Healthcare', 'Economy', 'Tech & AI', 'Governance', 'Sustainability', 'Youth & Sports'];
+            const sectorCounts = sectors.map(s => window.proposals.filter(p => p.sector === s).length);
+
+            const ctx1 = document.getElementById('chart-sector').getContext('2d');
+            if (chartSectorInstance) chartSectorInstance.destroy();
+            chartSectorInstance = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: sectors,
+                    datasets: [{ data: sectorCounts, backgroundColor: ['#0b69a3', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316', '#64748b'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } } } }
+            });
+
+            const statuses = ['Published', 'In Action', 'Under Review', 'Draft'];
+            const statusCounts = statuses.map(st => window.proposals.filter(p => p.status === st).length);
+
+            const ctx2 = document.getElementById('chart-status').getContext('2d');
+            if (chartStatusInstance) chartStatusInstance.destroy();
+            chartStatusInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: statuses,
+                    datasets: [{ label: 'Proposals Count', data: statusCounts, backgroundColor: ['#10b981', '#0b69a3', '#f59e0b', '#94a3b8'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor } }, y: { ticks: { color: textColor, stepSize: 1 } } } }
+            });
+        }
+
+        // UTILITY FUNCTIONS
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = 'fa-solid fa-moon';
+            } else {
+                html.classList.add('dark');
+                icon.className = 'fa-solid fa-sun text-amber-400';
+            }
+            if (window.currentTab === 'analytics') renderAnalyticsCharts();
+        };
+
+        window.showToast = function(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-red-600' : 'bg-civic-700');
+            
+            toast.className = `${bg} text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-bold flex items-center space-x-2 pointer-events-auto transition-all duration-300 opacity-100`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-info-circle'}"></i> <span>${msg}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+
+        // STARTUP
+        window.addEventListener('load', () => {
+            initAuthAndData();
+        });
+    </script>
+</body>
+</html>
